@@ -1,20 +1,21 @@
 const express = require('express');
-const request = require('request');
 const cors = require('cors');
+const request = require('request');
 
 const app = express();
 app.use(cors());
-
-// Default route to confirm server is working
-app.get('/', (req, res) => {
-    res.send("Proxy Server is Running! Use /proxy?url=https://example.com");
-});
 
 app.get('/proxy', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('No URL provided');
 
-    request(url, (error, response, body) => {
+    request({
+        url: url,
+        headers: {
+            'User-Agent': req.headers['user-agent'],  // Forward user's browser agent
+            'Referer': url,  // Helps bypass security checks
+        }
+    }, (error, response, body) => {
         if (error) return res.status(500).send('Error fetching page');
         res.send(body);
     });
