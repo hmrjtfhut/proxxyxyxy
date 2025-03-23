@@ -5,6 +5,11 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
+// Default route to confirm server is working
+app.get('/', (req, res) => {
+    res.send("Proxy Server is Running! Use /proxy?url=https://example.com");
+});
+
 app.get('/proxy', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('No URL provided');
