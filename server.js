@@ -1,11 +1,26 @@
-<script>
-function openSite() {
-    let url = document.getElementById("url").value;
-    let proxyUrl = "https://www.croxyproxy.com/?url=" + encodeURIComponent(url);
-    document.getElementById("browser").src = proxyUrl;
-}
-</script>
+const express = require('express');
+const request = require('request');
+const cors = require('cors');
 
-<input type="text" id="url" placeholder="Enter website URL">
-<button onclick="openSite()">Go</button>
-<iframe id="browser" width="100%" height="500px"></iframe>
+const app = express();
+app.use(cors());
+
+// Proxy any website (no site blocking)
+app.get('/proxy', (req, res) => {
+    let url = req.query.url;
+    if (!url) return res.status(400).send("No URL provided");
+
+    // Fix URLs without http/https
+    if (!url.startsWith("http")) url = "https://" + url;
+
+    request({
+        url: url,
+        headers: {
+            'User-Agent': req.headers['user-agent'],
+            'Referer': url,
+        }
+    }).pipe(res); // Stream the response directly
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Proxy server running on port ${PORT}`));
